@@ -6,17 +6,15 @@ import com.kuzmak.rabbit.services.RabbitVirtualHostService;
 import com.rabbitmq.http.client.domain.VhostInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import static com.google.common.collect.Iterables.tryFind;
-import static org.apache.commons.collections4.CollectionUtils.*;
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 @Component
 @RequiredArgsConstructor
@@ -32,7 +30,7 @@ public class RabbitApplicationReadyEvent implements ApplicationListener<Applicat
 
         final var virtualHostInformation = virtualHostService.getVirtualHostInformation();
 
-        if(!virtualHostExists(virtualHostInformation, "dev")) {
+        if (!virtualHostExists(virtualHostInformation, "dev")) {
             virtualHostService.createVirtualHost("dev");
         }
 
@@ -48,6 +46,5 @@ public class RabbitApplicationReadyEvent implements ApplicationListener<Applicat
 
     private boolean virtualHostExists(final List<VhostInfo> virtualHostInformation, final String virtualHost) {
         return !isEmpty(virtualHostInformation) && tryFind(virtualHostInformation, vh -> vh != null && Objects.equals(vh.getName(), virtualHost)).isPresent();
-
     }
 }
