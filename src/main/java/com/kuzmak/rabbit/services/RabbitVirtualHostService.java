@@ -9,4 +9,6 @@ public interface RabbitVirtualHostService {
     List<VhostInfo> getVirtualHostInformation();
 
     void createVirtualHost(String name);
+
+    void createVirtualHosts(List<String> names);
 }

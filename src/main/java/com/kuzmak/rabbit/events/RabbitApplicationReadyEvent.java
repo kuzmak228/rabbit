@@ -5,7 +5,6 @@ import com.kuzmak.rabbit.services.RabbitVirtualHostService;
 import com.rabbitmq.http.client.domain.VhostInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationPreparedEvent;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -37,6 +36,5 @@ public class RabbitApplicationReadyEvent implements ApplicationListener<Applicat
 
     private boolean virtualHostExists(final List<VhostInfo> virtualHostInformation, final String virtualHost) {
         return !isEmpty(virtualHostInformation) && tryFind(virtualHostInformation, vh -> vh != null && Objects.equals(vh.getName(), virtualHost)).isPresent();
-
     }
 }
