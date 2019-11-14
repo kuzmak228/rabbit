@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 
+import java.util.List;
+
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Service
@@ -40,5 +42,11 @@ public class SimpleRabbitQueueService implements RabbitQueueService {
     @Override
     public boolean queueExists(final String vhost, final String name) throws InvalidQueueDeclarationException {
         return getQueue(vhost, name) != null;
+    }
+
+    @Override
+    public List<QueueInfo> getAllQueues() {
+        log.info("Trying to get all queues");
+        return client.getQueues();
     }
 }

@@ -3,6 +3,8 @@ package com.kuzmak.rabbit.services;
 import com.kuzmak.rabbit.exceptions.InvalidQueueDeclarationException;
 import com.rabbitmq.http.client.domain.QueueInfo;
 
+import java.util.List;
+
 public interface RabbitQueueService {
 
     void declareQueue(String vhost, String name, boolean durable, boolean exclusive, boolean autoDelete);
@@ -10,4 +12,6 @@ public interface RabbitQueueService {
     QueueInfo getQueue(String vhost, String name) throws InvalidQueueDeclarationException;
 
     boolean queueExists(String vhost, String name) throws InvalidQueueDeclarationException;
+
+    List<QueueInfo> getAllQueues();
 }

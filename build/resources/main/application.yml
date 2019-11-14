@@ -1,2 +1,13 @@
+spring:
+  rabbitmq:
+    username: guest
+    password: guest
+    virtual-host: dev
+    host: localhost
+    port: 5672
+    routing-key: routing-key
+    queues:
+      - Listener
+
 exchange:
-  topic: check
+  topic: exchange-topic

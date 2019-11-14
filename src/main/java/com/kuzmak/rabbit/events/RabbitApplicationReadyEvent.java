@@ -1,7 +1,6 @@
 package com.kuzmak.rabbit.events;
 
-import com.kuzmak.rabbit.exceptions.InvalidQueueDeclarationException;
-import com.kuzmak.rabbit.services.RabbitQueueService;
+import com.kuzmak.rabbit.configuratuion.RabbitProperties;
 import com.kuzmak.rabbit.services.RabbitVirtualHostService;
 import com.rabbitmq.http.client.domain.VhostInfo;
 import lombok.RequiredArgsConstructor;
@@ -21,25 +20,16 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 @Slf4j
 public class RabbitApplicationReadyEvent implements ApplicationListener<ApplicationReadyEvent> {
 
-
+    private final RabbitProperties rabbitProperties;
     private final RabbitVirtualHostService virtualHostService;
-    private final RabbitQueueService queueService;
 
     @Override
     public void onApplicationEvent(final ApplicationReadyEvent event) {
 
         final var virtualHostInformation = virtualHostService.getVirtualHostInformation();
 
-        if (!virtualHostExists(virtualHostInformation, "dev")) {
-            virtualHostService.createVirtualHost("dev");
-        }
-
-        try {
-            if (queueService.queueExists("/", "queue")) {
-                queueService.declareQueue("/", "queue", false, false, true);
-            }
-        } catch (final InvalidQueueDeclarationException e) {
-            log.error(e.getMessage(), e);
+        if (!virtualHostExists(virtualHostInformation, rabbitProperties.getVirtualHost())) {
+            virtualHostService.createVirtualHost(rabbitProperties.getVirtualHost());
         }
 
     }
