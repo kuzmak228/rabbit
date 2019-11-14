@@ -1,9 +1,20 @@
-package com.kuzmak.rabbit.rabbitConfig;
+package com.kuzmak.rabbit.configuratuion;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.DirectExchange;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.rabbit.AsyncRabbitTemplate;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.SmartMessageConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.amqp.SimpleRabbitListenerContainerFactoryConfigurer;
 import org.springframework.context.annotation.Bean;
@@ -15,8 +26,16 @@ import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
+import javax.annotation.PreDestroy;
+import java.util.List;
+
+import static org.apache.commons.collections4.CollectionUtils.isEmpty;
+
 @Configuration
+@RequiredArgsConstructor
 public class RabbitMQConfiguration {
+
+    private final RabbitProperties rabbitProperties;
 
     @Value("${exchange.topic:#{null}}")
     private String topicExchange;
@@ -25,7 +44,7 @@ public class RabbitMQConfiguration {
     SimpleRabbitListenerContainerFactory simpleRabbitListenerContainerFactory(
             final SimpleRabbitListenerContainerFactoryConfigurer configurer,
             final CachingConnectionFactory connectionFactory,
-            final Jackson2JsonMessageConverter messageConverter,
+            final SmartMessageConverter messageConverter,
             final RetryTemplate retryTemplate
     ) {
         final var factory = new SimpleRabbitListenerContainerFactory();
@@ -46,12 +65,22 @@ public class RabbitMQConfiguration {
     @Primary
     CachingConnectionFactory cachingConnectionFactory() {
         final var cachingConnectionFactory = new CachingConnectionFactory();
-        cachingConnectionFactory.setPassword("guest");
-        cachingConnectionFactory.setUsername("guest");
-        cachingConnectionFactory.setPort(15672);
-        cachingConnectionFactory.setHost("localhost");
+        cachingConnectionFactory.setPassword(rabbitProperties.getPassword());
+        cachingConnectionFactory.setUsername(rabbitProperties.getUsername());
+        cachingConnectionFactory.setPort(rabbitProperties.getPort());
+        cachingConnectionFactory.setHost(rabbitProperties.getHost());
+        cachingConnectionFactory.setCacheMode(CachingConnectionFactory.CacheMode.CHANNEL);
 
         return cachingConnectionFactory;
+    }
+
+
+    @Bean
+    RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        final var rabbitAdmin = new RabbitAdmin(connectionFactory);
+        final var queues = rabbitProperties.getQueues();
+        createQueues(queues, rabbitAdmin);
+        return rabbitAdmin;
     }
 
     @Bean
@@ -78,7 +107,24 @@ public class RabbitMQConfiguration {
     }
 
     @Bean
-    Jackson2JsonMessageConverter messageConverter(final ObjectMapper mapper) {
+    SmartMessageConverter messageConverter(final ObjectMapper mapper) {
         return new Jackson2JsonMessageConverter(mapper);
+    }
+
+    private void createQueues(List<String> queues, RabbitAdmin rabbitAdmin) {
+        if (isEmpty(queues)) return;
+        queues.forEach(queueName -> {
+            final var queue = new Queue(queueName, false, false, true, null);
+            rabbitAdmin.declareQueue(queue);
+            rabbitAdmin.declareExchange(new TopicExchange(queueName + "." + topicExchange));
+
+            rabbitAdmin.declareBinding(
+                    BindingBuilder
+                            .bind(queue)
+                            .to(new TopicExchange(queueName + "." + topicExchange))
+                            .with(queueName + "." + rabbitProperties.getRoutingKey())
+            );
+
+        });
     }
 }
