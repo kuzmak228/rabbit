@@ -16,7 +16,7 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 @Service
 @Slf4j
-public class SimpleRabbitQueueService implements RabbitQueueService {
+public class DefaultRabbitQueueService implements RabbitQueueService {
 
     private Client client;
 
