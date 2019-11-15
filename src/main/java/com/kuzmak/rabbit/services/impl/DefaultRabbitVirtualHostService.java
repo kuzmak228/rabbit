@@ -14,7 +14,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
 @Service
 @Slf4j
-public class SimpleRabbitVirtualHostService implements RabbitVirtualHostService {
+public class DefaultRabbitVirtualHostService implements RabbitVirtualHostService {
 
     private Client client;
 
