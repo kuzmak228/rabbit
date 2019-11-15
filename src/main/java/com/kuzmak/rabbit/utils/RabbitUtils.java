@@ -28,7 +28,7 @@ public class RabbitUtils {
 
     public static Client initializeClient() {
         try {
-           return new Client(
+            return new Client(
                     "http://" + "localhost" + ":" + "15672" + "/api/",
                     Objects.requireNonNull("guest"),
                     Objects.requireNonNull("guest"));

@@ -2,7 +2,7 @@ spring:
   rabbitmq:
     username: guest
     password: guest
-    virtual-host: /
+    virtual-host: /dev
     host: localhost
     port: 5672
     routing-key: routing-key

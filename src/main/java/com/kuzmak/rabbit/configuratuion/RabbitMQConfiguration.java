@@ -1,6 +1,8 @@
 package com.kuzmak.rabbit.configuratuion;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kuzmak.rabbit.services.RabbitVirtualHostService;
+import com.kuzmak.rabbit.utils.RabbitUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
@@ -59,12 +61,13 @@ public class RabbitMQConfiguration {
 
     @Bean
     @Primary
-    CachingConnectionFactory cachingConnectionFactory() {
+    CachingConnectionFactory cachingConnectionFactory(final RabbitVirtualHostService virtualHostService) {
+        virtualHostService.getOrCreateHost(rabbitProperties.getVirtualHost());
+
         final var cachingConnectionFactory = new CachingConnectionFactory();
         cachingConnectionFactory.setPassword(rabbitProperties.getPassword());
         cachingConnectionFactory.setUsername(rabbitProperties.getUsername());
         cachingConnectionFactory.setPort(rabbitProperties.getPort());
-        cachingConnectionFactory.setHost(rabbitProperties.getHost());
         cachingConnectionFactory.setVirtualHost(rabbitProperties.getVirtualHost());
         cachingConnectionFactory.setCacheMode(CachingConnectionFactory.CacheMode.CHANNEL);
 

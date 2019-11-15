@@ -11,4 +11,6 @@ public interface RabbitVirtualHostService {
     void createVirtualHost(String name);
 
     void createVirtualHosts(List<String> names);
+
+    String getOrCreateHost(String name);
 }

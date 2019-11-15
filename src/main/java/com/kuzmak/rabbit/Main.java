@@ -6,12 +6,16 @@ import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.annotation.PreDestroy;
 
 @SpringBootApplication
 @EnableConfigurationProperties
 @RequiredArgsConstructor
+@EnableAsync
+@EnableScheduling
 public class Main {
 
     private final RabbitProperties rabbitProperties;
